@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group 'fr.nicknqck'
+version '1.0.41'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "https://repo.codemc.io/repository/maven-snapshots/" }
+    maven { url ="https://mvnrepository.com/artifact/"}
+    maven { url ='https://jitpack.io' }
+}
+
+compileJava.options.encoding = "UTF-8"
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
+dependencies {
+    implementation 'com.github.Ph1Lou:WerewolfApi:-SNAPSHOT'
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    // compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT' // The Spigot API with no shadowing. Requires the OSS repo.
+    compileOnly 'org.spigotmc:spigot:1.8.8-R0.1-SNAPSHOT' // The full Spigot server with no shadowing. Requires mavenLocal.
+    testCompileOnly 'org.projectlombok:lombok:1.18.32'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
+    ///  implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.3'
+    //  implementation files('D:\\Directorty\\Nakime Fiesta\\libs\\bukkitapi-1.0.jar')
+  //  compileOnly files('T:\\Bureau\\Dev\\Serv\\serveur de test\\spigot.jar')
+}
+
+shadowJar {
+    // 'net.lingala.zip4j', 'fr.nickncqk.utils.particles'
+}
+
+setLibsDirName("T:\\Bureau\\Dev\\Serv\\serveur de test 3\\plugins")

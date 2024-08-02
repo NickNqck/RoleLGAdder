@@ -1,0 +1,5 @@
+name: LGCustom
+version: '${version}'
+main: fr.lgcustom.LGCustom
+load: STARTUP
+depend : [WereWolfPlugin]

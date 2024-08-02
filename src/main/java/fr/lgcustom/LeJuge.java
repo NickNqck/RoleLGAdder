@@ -34,6 +34,8 @@ public class LeJuge extends RoleNeutral {
         Bukkit.getScheduler().runTaskLaterAsynchronously(LGCustom.getInstance(), () -> {
             this.killRunnable = new KillRunnable(this);
             killRunnable.runTaskTimerAsynchronously(LGCustom.getInstance(), 0, 20);
+            Bukkit.broadcastMessage("Le runnable du juge a démarré");
+            killRunnable.chooseTarget();
         }, 100);
     }
 
@@ -81,6 +83,10 @@ public class LeJuge extends RoleNeutral {
     @EventHandler
     private void onWin(WinEvent event) {
         if (this.killRunnable != null) {
+            Player player = Bukkit.getPlayer(this.getPlayerUUID());
+            if (player != null) {
+                killRunnable.addSpeedAtInt(player, -killRunnable.speedAdded);
+            }
             this.killRunnable.cancel();
         }
     }
@@ -89,6 +95,7 @@ public class LeJuge extends RoleNeutral {
         private final LeJuge leJuge;
         private int actualTimer;
         private UUID uuidTarget;
+        private int speedAdded = 0;
         private boolean killTarget = false;
         private KillRunnable(LeJuge juge) {
             this.leJuge = juge;
@@ -106,12 +113,20 @@ public class LeJuge extends RoleNeutral {
                             player.sendMessage("§7Vous avez perdu de la§c vie§7 suite à l'échec de votre mission.");
                         }
                         chooseTarget();
+                        Bukkit.broadcastMessage("Le juge a perdu 1 coeurs permanent");
                     }
                 }
             }
         }
-        private void chooseTarget() {
-            final List<IPlayerWW> igPlayers = new ArrayList<>(LGCustom.getInstance().getApi().getPlayersWW());
+        private void chooseTarget(){
+            Bukkit.broadcastMessage("Choosing target for LeJuge.java");
+            final List<IPlayerWW> igPlayers = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (LGCustom.getInstance().getApi().getPlayerWW(player.getUniqueId()).isPresent()) {
+                    IPlayerWW iPlayer = LGCustom.getInstance().getApi().getPlayerWW(player.getUniqueId()).get();
+                    igPlayers.add(iPlayer);
+                }
+            }
             final List<IPlayerWW> goodPlayers = new ArrayList<>();
             for (final IPlayerWW p : igPlayers) {
                 if (p.getRole() != null) {
@@ -147,6 +162,7 @@ public class LeJuge extends RoleNeutral {
             StringBuilder sb = new StringBuilder();
             sb.append("§7Vous avez réussi à tuer votre§c cible§7, vous obtenez donc§c +5%§7 de ");
             if (random == 0) {
+                speedAdded+=5;
                 addSpeedAtInt(victim, 5);
                 sb.append("§cSpeed");
             } else if (random == 1) {
@@ -158,6 +174,7 @@ public class LeJuge extends RoleNeutral {
             }
             sb.append("§7.");
             killer.sendMessage(new TextComponent(sb.toString()));
+            Bukkit.broadcastMessage("Une cible a été chercher pour le juge");
         }
         public void addSpeedAtInt(Player player, float speedpercent) {player.setWalkSpeed(player.getWalkSpeed()+(speedpercent/500));}
     }

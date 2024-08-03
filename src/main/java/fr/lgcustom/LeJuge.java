@@ -110,14 +110,12 @@ public class LeJuge extends RoleNeutral {
                             player.sendMessage("§7Vous avez perdu de la§c vie§7 suite à l'échec de votre mission.");
                         }
                         chooseTarget();
-                        Bukkit.broadcastMessage("Le juge a perdu 1 coeurs permanent");
                     }
                 }
             }
         }
         private void chooseTarget(){
             Bukkit.getScheduler().runTask(LGCustom.getInstance(), () ->  {
-                Bukkit.broadcastMessage("Choosing target for LeJuge.java");
                 IPlayerWW targetWW = null;
                 int trya = 0;
                 while (targetWW == null && trya < 100) {
@@ -138,7 +136,7 @@ public class LeJuge extends RoleNeutral {
                 if (targetWW == null) {
                     leJuge.getPlayerWW().sendMessage(new TextComponent("§7Aucune cible trouver"));
                 }
-                Bukkit.broadcastMessage("Shuffle list goodPlayers");
+                assert targetWW != null;
                 this.uuidTarget = targetWW.getRole().getPlayerUUID();
                 leJuge.getPlayerWW().sendMessage(new TextComponent("§7Votre §ccible§7 est maintenant: "+Bukkit.getPlayer(uuidTarget).getName()));
             });
@@ -165,7 +163,6 @@ public class LeJuge extends RoleNeutral {
             }
             sb.append("§7.");
             killer.sendMessage(new TextComponent(sb.toString()));
-            Bukkit.broadcastMessage("Une cible a été chercher pour le juge");
         }
         public void addSpeedAtInt(Player player, float speedpercent) {player.setWalkSpeed(player.getWalkSpeed()+(speedpercent/500));}
     }

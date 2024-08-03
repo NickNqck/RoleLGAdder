@@ -8,8 +8,8 @@ import fr.ph1lou.werewolfapi.game.WereWolfAPI;
 import fr.ph1lou.werewolfapi.player.impl.PotionModifier;
 import fr.ph1lou.werewolfapi.player.interfaces.IPlayerWW;
 import fr.ph1lou.werewolfapi.role.impl.RoleNeutral;
-import fr.ph1lou.werewolfapi.role.interfaces.IRole;
 import fr.ph1lou.werewolfapi.role.utils.DescriptionBuilder;
+import fr.ph1lou.werewolfapi.utils.Utils;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,9 +20,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 @Role(key = LGCustom.KEY+".role.lejuge.display", category = Category.NEUTRAL, attribute = RoleAttribute.NEUTRAL, defaultAura = Aura.NEUTRAL)
@@ -119,38 +116,32 @@ public class LeJuge extends RoleNeutral {
             }
         }
         private void chooseTarget(){
-            Bukkit.broadcastMessage("Choosing target for LeJuge.java");
-            final List<IPlayerWW> igPlayers = new ArrayList<>();
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (LGCustom.getInstance().getApi().getPlayerWW(player.getUniqueId()).isPresent()) {
-                    IPlayerWW iPlayer = LGCustom.getInstance().getApi().getPlayerWW(player.getUniqueId()).get();
-                    igPlayers.add(iPlayer);
-                }
-            }
-            final List<IPlayerWW> goodPlayers = new ArrayList<>();
-            for (final IPlayerWW p : igPlayers) {
-                if (p.getRole() != null) {
-                    IRole role = p.getRole();
-                    if (!role.getCamp().equals(Camp.NEUTRAL)) {
-                        goodPlayers.add(p);
+            Bukkit.getScheduler().runTask(LGCustom.getInstance(), () ->  {
+                Bukkit.broadcastMessage("Choosing target for LeJuge.java");
+                IPlayerWW targetWW = null;
+                int trya = 0;
+                while (targetWW == null && trya < 100) {
+                    trya++;
+                    targetWW = Utils.autoSelect(leJuge.game, leJuge.getPlayerWW());
+                    if (targetWW.equals(leJuge.getPlayerWW())) {
+                        targetWW = null;
+                    } else {
+                      if (targetWW.getRole() == null) {
+                          targetWW = null;
+                      } else {
+                          if (targetWW.getRole().getCamp() == Camp.NEUTRAL) {
+                              targetWW = null;
+                          }
+                      }
                     }
                 }
-            }
-            if (goodPlayers.isEmpty()) {
-                Player owner = Bukkit.getPlayer(leJuge.getPlayerUUID());
-                if (owner != null) {
-                    owner.sendMessage("§7Aucune§c cible§7 n'a été trouver.");
+                if (targetWW == null) {
+                    leJuge.getPlayerWW().sendMessage(new TextComponent("§7Aucune cible trouver"));
                 }
-                return;
-            }
-            while (this.uuidTarget == null) {
-                Collections.shuffle(goodPlayers, LGCustom.RANDOM);
-                if (LGCustom.RANDOM.nextInt(100) <= 10 && goodPlayers.get(0) != null && goodPlayers.get(0).getMojangUUID().isPresent()) {
-                    this.uuidTarget = goodPlayers.get(0).getMojangUUID().get();
-                }
-            }
-
-            leJuge.getPlayerWW().sendMessage(new TextComponent("§7Votre §ccible§7 est maintenant: "+Bukkit.getPlayer(uuidTarget).getName()));
+                Bukkit.broadcastMessage("Shuffle list goodPlayers");
+                this.uuidTarget = targetWW.getRole().getPlayerUUID();
+                leJuge.getPlayerWW().sendMessage(new TextComponent("§7Votre §ccible§7 est maintenant: "+Bukkit.getPlayer(uuidTarget).getName()));
+            });
         }
         private void onKillTarget(IPlayerWW killer) {
             Player victim = Bukkit.getPlayer(uuidTarget);
